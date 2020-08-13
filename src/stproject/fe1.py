@@ -1,10 +1,8 @@
 from pathlib import Path
 import numpy as np
 import pandas as pd
-from tabula import read_pdf
-from rdkit import Chem
-from rdkit import RDConfig
-import utils
+from rdkit.Chem import PandasTools, Fragments
+from utils import *
 import config
 import re
 
@@ -14,23 +12,15 @@ data_dir_raw = Path('../../data')
 """
 -----------------------------FEATURE ENGINEERING 1------------------------------------
 """
-df_stliq_clean = pd.read_csv(data_dir_raw / 'df_stliq_clean.csv')
+df_stliq_clean = pd.read_csv(data_dir_raw / 'df_stliq_clean.csv', index_col=0)
 
 # adding column hosting RDKit molecule object from smiles
-Chem.PandasTools.AddMoleculeColumnToFrame(df_stliq_clean, 'smiles', 'rdkmol', includeFingerprints=True)
+PandasTools.AddMoleculeColumnToFrame(df_stliq_clean, 'smiles', 'rdkmol', includeFingerprints=True)
 
-# generating canonical smiles
-df_stliq_clean['csmiles'] = Chem.MolToSmiles(x, True)
+# generating X and Y
+X = df_stliq_clean['rdkmol'].apply(countfrags1)
+print(X)
 
-# adding features
-
-c_regex = re.compile('C\(C.*\)\(C')
-ch_regex = re.compile('C\(C.*\)(?!\()')
-ch2_regex = re.compile('C')
-
-
-
-print(df_stliq_clean)
 """
 --------------------------------------------------------------------------------------
 """

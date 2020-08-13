@@ -2,7 +2,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from tabula import read_pdf
-from rdkit.Chem import PandasTools
+
 from rdkit import RDConfig
 import utils
 import re
