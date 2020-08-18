@@ -18,7 +18,7 @@ df_stliq_clean = pd.read_csv(data_dir_raw / 'df_stliq_clean.csv', index_col=0)
 PandasTools.AddMoleculeColumnToFrame(df_stliq_clean, 'smiles', 'rdkmol', includeFingerprints=True)
 
 # generating X and Y
-X = df_stliq_clean['rdkmol'].apply(countfrags1)
+X = df_stliq_clean['rdkmol'].apply(count_frags_1)
 print(X)
 
 """

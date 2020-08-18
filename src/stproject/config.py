@@ -19,6 +19,7 @@ data_dir_raw = Path('../../data')
 Extracts and cleans full dataframe of surface tensions of liquid
 rows = chemicals
 raw data columns = No, Molecule, SMILES notation, Measured ST, MF, CAS RN
+Index from dataframe before exclusion of silicon-containing sample are preserved
 """
 
 # df_stliq_import = read_pdf(data_dir_raw / 'st_liq.pdf', pages='3-11')

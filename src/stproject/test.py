@@ -2,12 +2,11 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from tabula import read_pdf
-from rdkit.Chem import Fragments
+from rdkit import Chem
 from rdkit import RDConfig
 from utils import *
 import re
 
-smiles = 'C1=CC=C(C(=C1)C(=O)O)C(=O)O'
+smiles = 'C1=CC=CC=C1'
 mol = Chem.MolFromSmiles(smiles)
-
-print(countfrags1(mol))
+print(Chem.MolToSmiles(mol))
