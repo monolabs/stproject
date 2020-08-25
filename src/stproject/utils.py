@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import sklearn.metrics as metrics
 from sklearn.model_selection import GridSearchCV
 import re
@@ -23,7 +24,7 @@ def count_rings(mol):
 
 
 def count_frags_0(mol):
-    # fragments: [C, H, O, C5, C6, double bond, triple bond, Ar, OH, ]
+    # fragments: [C, H, O, 3 to 8 membered rings, double bond, triple bond, Ar, OH, CHO, CO, COOH, COOR]
 
     frags = dict.fromkeys(['C', 'H', 'O', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'C=C', 'C#C', 'Ar',
                            'OH', 'CHO', 'CO', 'COOH', 'COOR'], 0)
@@ -50,35 +51,68 @@ def count_frags_0(mol):
     frags['COOH'] = Chem.Fragments.fr_COO(mol)
     frags['COOR'] = Chem.Fragments.fr_ester(mol)
 
-    # scaling by molecular weight
-    for (key,value) in frags.items():
-        frags[key] /= M
+    # catching formate motif (undetected by RDKit 2020.03.2.0)
+    frags['COOR'] += Chem.Fragments.fr_C_O(mol) - frags['CHO'] - frags['CO'] - frags['COOH']
 
-    return list(frags.values())
-
-def count_frags_1(mol):
-    # return a list of fragment counts from rdkit's 'mol' object
-    # fragments: [C, CH, CH2, CH3, C-ring, CH-ring, CH2-ring, Al-OH, Ar-OH, C-O-C, CHO, CO, COOR, COOH, Ar]
-
-    frags = [0] * 12
-    for atom in mol.GetAtoms():
-        if atom.GetSymbol() == 'C' and atom.GetTotalDegree() == 4:
-            if not atom.IsInRing():
-                frags[atom.GetTotalNumHs()] += 1 # update for C, CH, CH2, CH3
-            else:
-                frags[atom.GetTotalNumHs()+4] += 1 # update for C-ring, CH-ring, CH2-ring
-
-    # update for OH, CHO, CO, COOR, COOH
-    frags[7:] = [Chem.Fragments.fr_Al_OH(mol),
-                 Chem.Fragments.fr_Ar_OH(mol),
-                 Chem.Fragments.fr_aldehyde(mol),
-                 Chem.Fragments.fr_ketone(mol),
-                 Chem.Fragments.fr_ester(mol),
-                 Chem.Fragments.fr_COO(mol),
-                 Chem.Fragments.fr_benzene(mol)]
+    frags['M'] = MolWt(mol)
 
     return frags
 
+def count_frags_1(mol):
+    # return a list of fragment counts from rdkit's 'mol' object
+    # fragments: [C, CH, CH2, CH3, C-ring, CH-ring, CH2-ring, C=C, C#C, Ar, OH, C-O-C, CHO, CO, COOR, COOH]
+
+    frags = dict.fromkeys(['C', 'CH', 'CH2', 'CH3', 'C-ring', 'CH-ring', 'CH2-ring', 'C=C', 'C#C', 'Ar',
+                           'OH', 'C-O-C', 'CHO', 'CO', 'COOR', 'M'], 0)
+    smiles = Chem.MolToSmiles(mol)
+
+    for atom in mol.GetAtoms():
+        if atom.GetSymbol() == 'C' and atom.GetTotalDegree() == 4:
+            if not atom.IsInRing():
+                if atom.GetTotalNumHs() == 0:
+                    frags['C'] += 1
+                elif atom.GetTotalNumHs() == 1:
+                    frags['CH'] += 1
+                elif atom.GetTotalNumHs() == 2:
+                    frags['CH2'] += 1
+                elif atom.GetTotalNumHs() == 3:
+                    frags['CH3'] += 1
+            else:
+                if atom.GetTotalNumHs() == 0:
+                    frags['C-ring'] += 1
+                elif atom.GetTotalNumHs() == 1:
+                    frags['CH-ring'] += 1
+                elif atom.GetTotalNumHs() == 2:
+                    frags['CH2-ring'] += 1
+
+    frags['C=C'] = len(re.findall('[0-9C\)]=[C\(]', smiles))
+    frags['C#C'] = len(re.findall('[0-9C\)]#[C\(]', smiles))
+
+    frags['Ar'] = Chem.Fragments.fr_benzene(mol)
+    frags['OH'] = Chem.Fragments.fr_Ar_OH(mol) + Chem.Fragments.fr_Al_OH(mol)
+    frags['CHO'] = Chem.Fragments.fr_aldehyde(mol)
+    frags['CO'] = Chem.Fragments.fr_ketone(mol)
+    frags['COOH'] = Chem.Fragments.fr_COO(mol)
+    frags['COOR'] = Chem.Fragments.fr_ester(mol)
+    frags['C-O-C'] = Chem.Fragments.fr_ether(mol)
+
+    # catching formate motif (undetected by RDKit 2020.03.2.0)
+    frags['COOR'] += Chem.Fragments.fr_C_O(mol) - frags['CHO'] - frags['CO'] - frags['COOH'] - frags['COOR']
+
+    # correcting ether by substracting ester (ester counts towards ether in RDKit 2020.03.2.0
+    frags['C-O-C'] -= frags['COOR']
+
+    frags['M'] = MolWt(mol)
+
+    return frags
+
+
+def construct_features(series, func):
+    features_series = series.apply(func)
+    df = pd.DataFrame([features_series.iloc[0]])
+    for ele in features_series.iloc[1:]:
+        df = df.append(ele, ignore_index=True)
+    return df
 
 def regression_results(y_true, y_pred):
 
@@ -96,18 +130,6 @@ def regression_results(y_true, y_pred):
     print('MAE: ', round(mean_absolute_error,4))
     print('MSE: ', round(mse,4))
     print('RMSE: ', round(np.sqrt(mse),4))
-
-
-def xgb_fit(alg,
-             dtrain,
-             predictors,
-             target,
-             useTrainCV=True,
-             cv_folds=5,
-             early_stopping_rounds=50):
-
-    if useTrainCV:
-        xgb_params = alg.get_xgb_params
 
 
 
