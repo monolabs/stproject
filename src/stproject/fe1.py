@@ -23,11 +23,12 @@ PandasTools.AddMoleculeColumnToFrame(df_stliq_clean, 'smiles', 'rdkmol', include
 df_fe1 = construct_features(df_stliq_clean['rdkmol'], count_frags_1)
 df_fe1.set_index(df_stliq_clean.index, inplace=True) # recovering original index
 
-# appending measured_st and molecule name from df_stliq_clean
+# appending measured_st, density and molecule name from df_stliq_clean
 df_fe1['measured_st'] = df_stliq_clean['measured_st']
 df_fe1['molecule'] = df_stliq_clean['molecule']
+df_fe1['density'] = df_stliq_clean['density']
 
-df_fe1 = df_fe1[~df_fe1['molecule'].str.contains('anhydride|carbonate|Formic acid')]
+df_fe1 = df_fe1[~df_fe1['molecule'].str.contains('anhydride|carbonate|Formic acid|Furan')]
 df_fe1.to_csv(data_dir_raw / 'df_fe1.csv')
 # --------------------------------------------------------------------------------------
 

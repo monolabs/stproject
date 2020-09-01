@@ -1,0 +1,24 @@
+﻿polymer,class,ru_1,ru_2,c_1,h_1,o_1,sb_1,db_1,c6_1,ar_1,m_1,c_2,h_2,o_2,sb_2,db_2,c6_2,ar_2,m_2,X_1,X_2,c,h,o,sb,db,c6,ar,m,molar_v
+polyethylene,radical,ethylene,,2,4,0,6,0,0,0,28.06,0,0,0,0,0,0,0,0,1,0,2,4,0,6,0,0,0,28.06,34.6
+polyisobutylene,radical,isobutylene,,4,8,0,12,0,0,0,56.12,0,0,0,0,0,0,0,0,1,0,4,8,0,12,0,0,0,56.12,61.4
+polypropylene,radical,propylene,,3,6,0,9,0,0,0,42.09,0,0,0,0,0,0,0,0,1,0,3,6,0,9,0,0,0,42.09,49.4
+polybutadiene(trans),radical,butadiene,,4,6,0,10,1,0,0,54.1,0,0,0,0,0,0,0,0,1,0,4,6,0,10,1,0,0,54.1,58.1
+polyisoprene(iso),radical,isoprene,,5,8,0,13,1,0,0,68.13,0,0,0,0,0,0,0,0,1,0,5,8,0,13,1,0,0,68.13,74.7
+polystyrene,radical,styrene,,8,8,0,11,0,0,1,104.16,0,0,0,0,0,0,0,0,1,0,8,8,0,11,0,0,1,104.16,100
+poly(4-methylstyrene),radical,4-methylstyrene,,9,10,0,14,0,0,1,118.19,0,0,0,0,0,0,0,0,1,0,9,10,0,14,0,0,1,118.19,125.2
+poly(1-butene),radical,1-butene,,4,8,0,12,0,0,0,56.12,0,0,0,0,0,0,0,0,1,0,4,8,0,12,0,0,0,56.12,64.4
+poly(1-pentene),radical,1-pentene,,5,10,0,15,0,0,0,70.15,0,0,0,0,0,0,0,0,1,0,5,10,0,15,0,0,0,70.15,82.5
+poly(vinyl alcohol),radical,vinyl alcohol,,2,4,1,5,0,0,0,44.06,0,0,0,0,0,0,0,0,1,0,2,4,1,5,0,0,0,44.06,34.7
+poly(butyl vinyl ether),radical,butyl vinyl ether,,6,12,1,17,0,0,0,100.18,0,0,0,0,0,0,0,0,1,0,6,12,1,17,0,0,0,100.18,108.8
+poly(ethylene oxide),polyether,ethylene oxide,,2,4,1,5,0,0,0,44.06,0,0,0,0,0,0,0,0,1,0,2,4,1,5,0,0,0,44.06,38.9
+poly(methylene oxide),polyether,formaldehyde,,1,2,1,2,0,0,0,30.03,0,0,0,0,0,0,0,0,1,0,1,2,1,2,0,0,0,30.03,24
+poly(propylene oxide),polyether,propylene oxide,,3,6,1,8,0,0,0,58.09,0,0,0,0,0,0,0,0,1,0,3,6,1,8,0,0,0,58.09,58.1
+poly(methyl methacrylate),radical,methyl methacrylate,,5,8,2,12,0,0,0,100.13,0,0,0,0,0,0,0,0,1,0,5,8,2,12,0,0,0,100.13,84.1
+poly(ethylene terephtalate),polyester,ethanediol,terephtalic acid,2,6,2,5,0,0,0,62.08,8,6,4,6,0,0,1,166.14,0.5,0.5,10,12,6,11,0,0,1,228.22,144.4
+poly(tetramethylene isophthalate),polyester,butanediol,isophthalic acid,4,10,2,11,0,0,0,90.14,8,6,4,6,0,0,1,166.14,0.5,0.5,12,16,6,17,0,0,1,256.28,173.7
+poly(5-methylresorcinol isophthalate),polyester,5-methylresorcinol,isophthalic acid,7,8,2,7,0,0,1,124.15,8,6,4,6,0,0,1,166.14,0.5,0.5,15,14,6,13,0,0,2,290.29,198.5
+poly(5-methylresorcinol 5-methylisophthalate),polyester,5-methylresorcinol,5-methylisophthalic acid,7,8,2,7,0,0,1,124.15,9,8,4,9,0,0,1,180.17,0.5,0.5,16,16,6,16,0,0,2,304.32,233.2
+poly(5-butylresorcinol isophthalate),polyester,5-butylresorcinol isophthalate,isophthalic acid,10,14,2,16,0,0,1,166.24,8,6,4,6,0,0,1,166.14,0.5,0.5,18,20,6,22,0,0,2,332.38,237.8
+poly(5-hexylresorcinol isophthalate),polyester,5-hexylresorcinol isophthalate,isophthalic acid,12,18,2,22,0,0,1,194.3,8,6,4,6,0,0,1,166.14,0.5,0.5,20,24,6,28,0,0,2,360.44,279.3
+poly(5-octylresorcinol isophthalate),polyester,5-octylresorcinol,isophthalic acid,14,22,2,28,0,0,1,222.36,8,6,4,6,0,0,1,166.14,0.5,0.5,22,28,6,34,0,0,2,388.5,303.4
+poly(5-tridecylresorcinol isophthalate),polyester,5-tridecylresorcinol,isophthalic acid,19,32,2,43,0,0,1,292.51,8,6,4,6,0,0,1,166.14,0.5,0.5,27,38,6,49,0,0,2,458.65,380.2
