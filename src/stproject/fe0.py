@@ -26,7 +26,8 @@ df_fe0.set_index(df_stliq_clean.index, inplace=True) # recovering original index
 # appending measured_st and molecule name from df_stliq_clean
 df_fe0['measured_st'] = df_stliq_clean['measured_st']
 df_fe0['molecule'] = df_stliq_clean['molecule']
+df_fe0['density'] = df_stliq_clean['density']
 
-df_fe0 = df_fe0[~df_fe0['molecule'].str.contains('anhydride|carbonate|Formic acid')]
+df_fe0 = df_fe0[~df_fe0['molecule'].str.contains('anhydride|carbonate|Formic acid|Furan')]
 df_fe0.to_csv(data_dir_raw / 'df_fe0.csv')
 # --------------------------------------------------------------------------------------

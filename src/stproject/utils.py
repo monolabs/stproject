@@ -27,7 +27,8 @@ def count_frags_0(mol):
     # fragments: [C, H, O, 3 to 8 membered rings, double bond, triple bond, Ar, OH, CHO, CO, COOH, COOR]
 
     frags = dict.fromkeys(['C', 'H', 'C=C', 'C#C', 'Ar', 'O-alc', 'O-eth',
-                           'O-ald', 'O-ket', 'O-acid', 'O-ester'], 0)
+                           'O-ald', 'O-ket', 'O-acid', 'O-ester',
+                           'R3', 'R4', 'R5', 'R6', 'R7', 'R8'], 0)
     smiles = Chem.MolToSmiles(mol)
     M = MolWt(mol)
 
@@ -47,13 +48,27 @@ def count_frags_0(mol):
 
     frags['Ar'] = Chem.Fragments.fr_benzene(mol)
     frags['O-alc'] = Chem.Fragments.fr_Ar_OH(mol) + Chem.Fragments.fr_Al_OH(mol)
+    frags['O-eth'] = Chem.Fragments.fr_ether(mol)
     frags['O-ald'] = Chem.Fragments.fr_aldehyde(mol)
     frags['O-ket'] = Chem.Fragments.fr_ketone(mol)
     frags['O-acid'] = Chem.Fragments.fr_COO(mol)
     frags['O-ester'] = Chem.Fragments.fr_ester(mol)
 
     # catching formate motif (undetected by RDKit 2020.03.2.0)
-    frags['COOR'] += Chem.Fragments.fr_C_O(mol) - frags['CHO'] - frags['CO'] - frags['COOH']
+    frags['O-ester'] += Chem.Fragments.fr_C_O(mol) - frags['O-ald'] - frags['O-ket'] - frags['O-acid'] - frags['O-ester']
+
+    # correcting C=C by subtracting aldehyde, ketone, acid and ester
+    frags['C=C'] = frags['C=C'] - frags['O-ald'] - frags['O-ket'] - frags['O-acid'] - frags['O-ester']
+
+    # correcting O-acid and O-ester to double O
+    frags['O-acid'] *= 2
+    frags['O-ester'] *= 2
+
+    # correcting O-ether by subtracting ester
+    frags['O-eth'] -= frags['O-ester']/2
+
+    # Excluding benzene ring from R6
+    frags['R6'] -= frags['Ar']
 
     frags['M'] = MolWt(mol)
 
