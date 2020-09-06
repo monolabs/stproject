@@ -33,10 +33,33 @@ df_fe1.to_csv(data_dir_raw / 'df_fe1.csv')
 # --------------------------------------------------------------------------------------
 
 
-
 # -----------------------------FEATURE ENGINEERING 1------------------------------------
-# ----------------------------------ESTER ONLY------------------------------------------
+# -------------------------------------DIOLS--------------------------------------------
 
-df_fe1_esteronly = df_fe1.loc[df_fe1['COOR'] > 0]
-df_fe1_esteronly.to_csv(data_dir_raw / 'df_fe1_esteronly.csv')
+df_diols = pd.read_csv(data_dir_raw / 'diols_ref.csv', index_col=0)
+
+# adding column hosting RDKit molecule object from smiles
+PandasTools.AddMoleculeColumnToFrame(df_diols, 'smiles', 'rdkmol', includeFingerprints=True)
+
+# adding features from feature engineering 0
+df_diols_fe1 = construct_features(df_diols['rdkmol'], count_frags_1)
+df_diols_fe1.set_index(df_diols.index, inplace=True) # recovering original index
+
+df_diols_fe1.to_csv(data_dir_raw / 'df_diols_fe1.csv')
+# --------------------------------------------------------------------------------------
+
+
+# -----------------------------FEATURE ENGINEERING 0------------------------------------
+# -------------------------------------ACIDS--------------------------------------------
+
+df_acids = pd.read_csv(data_dir_raw / 'acids_ref.csv', index_col=0)
+
+# adding column hosting RDKit molecule object from smiles
+PandasTools.AddMoleculeColumnToFrame(df_acids, 'smiles', 'rdkmol', includeFingerprints=True)
+
+# adding features from feature engineering 0
+df_acids_fe1 = construct_features(df_acids['rdkmol'], count_frags_1)
+df_acids_fe1.set_index(df_acids.index, inplace=True) # recovering original index
+
+df_acids_fe1.to_csv(data_dir_raw / 'df_acids_fe1.csv')
 # --------------------------------------------------------------------------------------

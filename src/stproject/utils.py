@@ -24,7 +24,6 @@ def count_rings(mol):
 
 
 def count_frags_0(mol):
-    # fragments: [C, H, O, 3 to 8 membered rings, double bond, triple bond, Ar, OH, CHO, CO, COOH, COOR]
 
     frags = dict.fromkeys(['C', 'H', 'C=C', 'C#C', 'Ar', 'O-alc', 'O-eth',
                            'O-ald', 'O-ket', 'O-acid', 'O-ester',
@@ -131,11 +130,49 @@ def count_frags_1(mol):
 
 
 def construct_features(series, func):
+    # USED ON LIQUID SURFACE TENSION DATASET (single molecule)
     features_series = series.apply(func)
     df = pd.DataFrame([features_series.iloc[0]])
     for ele in features_series.iloc[1:]:
         df = df.append(ele, ignore_index=True)
     return df
+
+def construct_avg_features (mol_series, molfrac_series, func):
+    # USED ON POLYMER MOLAR VOLUME DATASET
+    # each element in series is a list containing RDKit mol objects
+    # returns pandas dataframe of computed features (weighed by molar fraction) based on func
+
+    df = pd.DataFrame()
+    for i in range(len(mol_series)):
+        dummy_df = pd.DataFrame()
+        for j in range(len(mol_series[i])):
+            dummy_df = pd.concat([dummy_df, pd.Series(func(mol_series.iloc[i][j])).to_frame().T * molfrac_series.iloc[i][j]],
+                                 ignore_index=True)
+        df = pd.concat([df, dummy_df.sum().to_frame().T])
+    df.index = mol_series.index
+
+    return df
+
+
+def avg_monomer_features(df, ref, monomers, features):
+    # USED ON POLYMER DATASET TO TEST
+    # computes averaged features from ref, weighed by molar ratio in df
+    # df = dataframe to be updated (row = polymer samples, columns include monomers molar fraction)
+    # ref = reference dataframe (row = monomers, column = features)
+    # monomers = monomers to compute the features of (list)
+    # features = features to update (list)
+    # returns
+
+    # to contain the entire engineered features for all observations
+    dummy_arr = np.zeros((len(df), len(features)))
+
+    for i, ind in enumerate(df.index):
+        # to contain the total features per observation
+        for monomer in monomers:
+            dummy_arr[i] += df.loc[ind, monomer] * ref.loc[monomer]
+
+    return pd.DataFrame(dummy_arr, columns=features)
+
 
 def regression_results(y_true, y_pred):
 

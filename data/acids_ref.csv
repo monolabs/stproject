@@ -1,0 +1,10 @@
+,smiles,cas
+acid_1,C(=CC(=O)O)C(=O)O,110-17-8
+acid_2,C(CCC(=O)O)CC(=O)O,204-04-9
+acid_3,C1=CC=C(C(=C1)C(=O)O)C(=O)O,88-99-3
+acid_4,CC1CCC(C(C1)C(=O)O)C(=O)O,57567-84-7
+acid_5,C1CC(CCC1C(=O)O)C(=O)O,619-82-9
+acid_6,C=C(CC(=O)O)C(=O)O,97-65-4
+acid_7,C(C(=O)O)C(CC(=O)O)(C(=O)O)O,77-92-9
+acid_8,C1=CC(=C(C=C1C(=O)O)C(=O)O)C(=O)O,528-44-9
+acid_9,C1=CC(=CC(=C1)C(=O)O)C(=O)O,121-915

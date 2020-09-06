@@ -7,5 +7,7 @@ from rdkit import RDConfig
 from utils import *
 import re
 
-smile = 'C1=CC=C(C=C1)C(=O)O'
-print(count_frags_0(Chem.MolFromSmiles(smile)))
+smiles = 'C1CO1'
+mol = Chem.MolFromSmiles(smiles)
+print(Chem.Fragments.fr_ester(mol))
+

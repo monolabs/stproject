@@ -1,0 +1,24 @@
+polymer,type,ru_1,ru_2,smiles_1,smiles_2,molfrac_1,molfrac_2,measured_mv
+polyethylene,radical,ethylene,,C=C,,1,0,34.6
+polyisobutylene,radical,isobutylene,,CC(=C)C,,1,0,61.4
+polypropylene,radical,propylene,,CC=C,,1,0,49.4
+polybutadiene(trans),radical,butadiene,,C=CC=C,,1,0,58.1
+polyisoprene(iso),radical,isoprene,,CC(=C)C=C,,1,0,74.7
+polystyrene,radical,styrene,,C=CC1=CC=CC=C1,,1,0,100
+poly(4-methylstyrene),radical,4-methylstyrene,,CC1=CC=C(C=C1)C=C,,1,0,125.2
+poly(1-butene),radical,1-butene,,CCC=C,,1,0,64.4
+poly(1-pentene),radical,1-pentene,,CCCC=C,,1,0,82.5
+poly(vinyl alcohol),radical,vinyl alcohol,,C=CO,,1,0,34.7
+poly(butyl vinyl ether),radical,butyl vinyl ether,,CCCCOC=C,,1,0,108.8
+poly(ethylene oxide),polyether,ethylene oxide,,C1CO1,,1,0,38.9
+poly(methylene oxide),polyether,formaldehyde,,C=O,,1,0,24
+poly(propylene oxide),polyether,propylene oxide,,CC1CO1,,1,0,58.1
+poly(methyl methacrylate),radical,methyl methacrylate,,CC(=C)C(=O)OC,,1,0,84.1
+poly(ethylene terephtalate),polyester,ethanediol,terephtalic acid,C(CO)O,C1=CC(=CC=C1C(=O)O)C(=O)O,0.5,0.5,144.4
+poly(tetramethylene isophthalate),polyester,"1,4-butanediol",isophthalic acid,C(CCO)CO,C1=CC(=CC(=C1)C(=O)O)C(=O)O,0.5,0.5,173.7
+poly(5-methylresorcinol isophthalate),polyester,5-methylresorcinol,isophthalic acid,CC1=CC(=CC(=C1)O)O,C1=CC(=CC(=C1)C(=O)O)C(=O)O,0.5,0.5,198.5
+poly(5-methylresorcinol 5-methylisophthalate),polyester,5-methylresorcinol,5-methylisophthalic acid,CC1=CC(=CC(=C1)O)O,CC1=CC(=CC(=C1)C(=O)O)C(=O)O,0.5,0.5,233.2
+poly(5-butylresorcinol isophthalate),polyester,5-butylresorcinol,isophthalic acid,CCCCC1=CC(=CC(=C1)O)O,C1=CC(=CC(=C1)C(=O)O)C(=O)O,0.5,0.5,237.8
+poly(5-hexylresorcinol isophthalate),polyester,5-hexylresorcinol,isophthalic acid,CCCCCCC1=CC(=CC(=C1)O)O,C1=CC(=CC(=C1)C(=O)O)C(=O)O,0.5,0.5,279.3
+poly(5-octylresorcinol isophthalate),polyester,5-octylresorcinol,isophthalic acid,CCCCCCCCC1=CC(=CC(=C1)O)O,C1=CC(=CC(=C1)C(=O)O)C(=O)O,0.5,0.5,303.4
+poly(5-tridecylresorcinol isophthalate),polyester,5-tridecylresorcinol,isophthalic acid,CCCCCCCCCCCCCC1=CC(=CC(=C1)O)O,C1=CC(=CC(=C1)C(=O)O)C(=O)O,0.5,0.5,380.2

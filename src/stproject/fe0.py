@@ -31,3 +31,51 @@ df_fe0['density'] = df_stliq_clean['density']
 df_fe0 = df_fe0[~df_fe0['molecule'].str.contains('anhydride|carbonate|Formic acid|Furan')]
 df_fe0.to_csv(data_dir_raw / 'df_fe0.csv')
 # --------------------------------------------------------------------------------------
+
+
+# -----------------------------FEATURE ENGINEERING 0------------------------------------
+# -------------------------------------POLYMER------------------------------------------
+
+df_acids = pd.read_csv(data_dir_raw / 'acids_ref.csv', index_col=0)
+
+# adding column hosting RDKit molecule object from smiles
+PandasTools.AddMoleculeColumnToFrame(df_acids, 'smiles', 'rdkmol', includeFingerprints=True)
+
+# adding features from feature engineering 0
+df_acids_fe0 = construct_features(df_acids['rdkmol'], count_frags_0)
+df_acids_fe0.set_index(df_acids.index, inplace=True) # recovering original index
+
+df_acids_fe0.to_csv(data_dir_raw / 'df_acids_fe0.csv')
+# --------------------------------------------------------------------------------------
+
+
+# -----------------------------FEATURE ENGINEERING 0------------------------------------
+# -------------------------------------DIOLS--------------------------------------------
+
+df_diols = pd.read_csv(data_dir_raw / 'diols_ref.csv', index_col=0)
+
+# adding column hosting RDKit molecule object from smiles
+PandasTools.AddMoleculeColumnToFrame(df_diols, 'smiles', 'rdkmol', includeFingerprints=True)
+
+# adding features from feature engineering 0
+df_diols_fe0 = construct_features(df_diols['rdkmol'], count_frags_0)
+df_diols_fe0.set_index(df_diols.index, inplace=True) # recovering original index
+
+df_diols_fe0.to_csv(data_dir_raw / 'df_diols_fe0.csv')
+# --------------------------------------------------------------------------------------
+
+
+# -----------------------------FEATURE ENGINEERING 0------------------------------------
+# -------------------------------------ACIDS--------------------------------------------
+
+df_acids = pd.read_csv(data_dir_raw / 'acids_ref.csv', index_col=0)
+
+# adding column hosting RDKit molecule object from smiles
+PandasTools.AddMoleculeColumnToFrame(df_acids, 'smiles', 'rdkmol', includeFingerprints=True)
+
+# adding features from feature engineering 0
+df_acids_fe0 = construct_features(df_acids['rdkmol'], count_frags_0)
+df_acids_fe0.set_index(df_acids.index, inplace=True) # recovering original index
+
+df_acids_fe0.to_csv(data_dir_raw / 'df_acids_fe0.csv')
+# --------------------------------------------------------------------------------------
