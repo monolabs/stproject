@@ -5,6 +5,8 @@ from sklearn.model_selection import GridSearchCV
 import re
 from rdkit import Chem
 from rdkit.Chem.Descriptors import MolWt
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 
 def diff(first, second):
@@ -190,6 +192,33 @@ def regression_results(y_true, y_pred):
     print('MAE: ', round(mean_absolute_error,4))
     print('MSE: ', round(mse,4))
     print('RMSE: ', round(np.sqrt(mse),4))
+
+
+def plot_results(y, y_hat, name_series, num_outliers, title, x_label, y_label, with_line=True):
+    # this function searches for the highest value of error metric and indicate the datapoints in a scatterplot
+    # number of marked data points is specified with num_outliers
+    # y_true, y_pred and name_series must be pandas series (with indices)
+    # name_series is a series containing names used to make sense of analysis
+
+    # points with highest error (in descending order)
+    i_out = abs(y - y_hat).sort_values(ascending=False).index[:num_outliers]
+    y_out = y[i_out]
+    y_hat_out = y_hat[i_out]
+    names_out = name_series[i_out]
+    print(pd.DataFrame({'name': names_out,
+                        'y': y_out,
+                        'y_hat': y_hat_out}))
+
+    # plotting data points
+    min_val,  max_val = np.min(y.append(y_hat)), np.max(y.append(y_hat))
+    sns.scatterplot(y_hat, y)
+    sns.scatterplot(y_hat_out, y_out)
+    if with_line:
+        sns.lineplot(x=[min_val, max_val], y=[min_val, max_val], alpha=0.2)
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.title(title, {'fontsize': 12, 'weight': 'bold'})
+
 
 
 

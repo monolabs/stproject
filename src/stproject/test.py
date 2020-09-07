@@ -7,7 +7,6 @@ from rdkit import RDConfig
 from utils import *
 import re
 
-smiles = 'C1CO1'
-mol = Chem.MolFromSmiles(smiles)
-print(Chem.Fragments.fr_ester(mol))
-
+s = pd.Series(range(15))
+s.append(s)
+print(s.append(s))

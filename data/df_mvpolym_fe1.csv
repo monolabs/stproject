@@ -1,0 +1,24 @@
+,C,CH,CH2,CH3,C-ring,CH-ring,CH2-ring,C=C,C#C,Ar,OH,C-O-C,CHO,CO,COOR,M,COOH,type,polymer,measured_mv,ru,measured_mv_scaled
+0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,28.053999999999995,0.0,radical,polyethylene,34.6,"['ethylene', nan]",17.3
+1,0.0,0.0,0.0,2.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,56.108000000000004,0.0,radical,polyisobutylene,61.4,"['isobutylene', nan]",30.7
+2,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,42.080999999999996,0.0,radical,polypropylene,49.4,"['propylene', nan]",24.7
+3,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,54.09199999999999,0.0,radical,polybutadiene(trans),58.1,"['butadiene', nan]",29.05
+4,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,68.11900000000001,0.0,radical,polyisoprene(iso),74.7,"['isoprene', nan]",37.35
+5,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,104.15199999999997,0.0,radical,polystyrene,100.0,"['styrene', nan]",50.0
+6,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,118.17899999999999,0.0,radical,poly(4-methylstyrene),125.2,"['4-methylstyrene', nan]",62.6
+7,0.0,0.0,1.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,56.108,0.0,radical,poly(1-butene),64.4,"['1-butene', nan]",32.2
+8,0.0,0.0,2.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,70.135,0.0,radical,poly(1-pentene),82.5,"['1-pentene', nan]",41.25
+9,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,44.053,0.0,radical,poly(vinyl alcohol),34.7,"['vinyl alcohol', nan]",17.35
+10,0.0,0.0,3.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,100.16099999999999,0.0,radical,poly(butyl vinyl ether),108.8,"['butyl vinyl ether', nan]",54.4
+11,0.0,0.0,0.0,0.0,0.0,0.0,2.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,44.053,0.0,polyether,poly(ethylene oxide),38.9,"['ethylene oxide', nan]",19.45
+12,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-1.0,0.0,0.0,1.0,30.026,0.0,polyether,poly(methylene oxide),24.0,"['formaldehyde', nan]",12.0
+13,0.0,0.0,0.0,1.0,0.0,1.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,58.08,0.0,polyether,poly(propylene oxide),58.1,"['propylene oxide', nan]",29.05
+14,0.0,0.0,0.0,2.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,100.11699999999999,0.0,radical,poly(methyl methacrylate),84.1,"['methyl methacrylate', nan]",42.05
+15,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,0.0,0.0,0.0,1.0,114.1,0.0,polyester,poly(ethylene terephtalate),144.4,"['ethanediol', 'terephtalic acid']",72.2
+16,0.0,0.0,2.0,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,0.0,0.0,0.0,1.0,128.12699999999998,0.0,polyester,poly(tetramethylene isophthalate),173.7,"['1,4-butanediol', 'isophthalic acid']",86.85
+17,0.0,0.0,0.0,0.5,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,145.13549999999998,0.0,polyester,poly(5-methylresorcinol isophthalate),198.5,"['5-methylresorcinol', 'isophthalic acid']",99.25
+18,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,152.14899999999997,0.0,polyester,poly(5-methylresorcinol 5-methylisophthalate),233.2,"['5-methylresorcinol', '5-methylisophthalic acid']",116.6
+19,0.0,0.0,1.5,0.5,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,166.176,0.0,polyester,poly(5-butylresorcinol isophthalate),237.8,"['5-butylresorcinol', 'isophthalic acid']",118.9
+20,0.0,0.0,2.5,0.5,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,180.20299999999997,0.0,polyester,poly(5-hexylresorcinol isophthalate),279.3,"['5-hexylresorcinol', 'isophthalic acid']",139.65
+21,0.0,0.0,3.5,0.5,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,194.23000000000002,0.0,polyester,poly(5-octylresorcinol isophthalate),303.4,"['5-octylresorcinol', 'isophthalic acid']",151.7
+22,0.0,0.0,6.0,0.5,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,229.29749999999996,0.0,polyester,poly(5-tridecylresorcinol isophthalate),380.2,"['5-tridecylresorcinol', 'isophthalic acid']",190.1
