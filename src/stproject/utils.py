@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import sklearn.metrics as metrics
+from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import GridSearchCV
 import re
 from rdkit import Chem
@@ -194,25 +195,12 @@ def regression_results(y_true, y_pred):
     print('RMSE: ', round(np.sqrt(mse),4))
 
 
-def plot_results(y, y_hat, name_series, num_outliers, title, x_label, y_label, with_line=True):
-    # this function searches for the highest value of error metric and indicate the datapoints in a scatterplot
-    # number of marked data points is specified with num_outliers
-    # y_true, y_pred and name_series must be pandas series (with indices)
-    # name_series is a series containing names used to make sense of analysis
+def plot_results(y, y_hat, i_out, num_outliers, title=None, x_label=None, y_label=None, with_line=True):
+    # plots data points with specified number of outliers and indices of outliers
 
-    # points with highest error (in descending order)
-    i_out = abs(y - y_hat).sort_values(ascending=False).index[:num_outliers]
-    y_out = y[i_out]
-    y_hat_out = y_hat[i_out]
-    names_out = name_series[i_out]
-    print(pd.DataFrame({'name': names_out,
-                        'y': y_out,
-                        'y_hat': y_hat_out}))
-
-    # plotting data points
-    min_val,  max_val = np.min(y.append(y_hat)), np.max(y.append(y_hat))
+    min_val, max_val = np.min(y.append(y_hat)), np.max(y.append(y_hat))
     sns.scatterplot(y_hat, y)
-    sns.scatterplot(y_hat_out, y_out)
+    sns.scatterplot(y_hat[i_out], y[i_out])
     if with_line:
         sns.lineplot(x=[min_val, max_val], y=[min_val, max_val], alpha=0.2)
     plt.xlabel(x_label)
@@ -220,5 +208,123 @@ def plot_results(y, y_hat, name_series, num_outliers, title, x_label, y_label, w
     plt.title(title, {'fontsize': 12, 'weight': 'bold'})
 
 
+def run_linear_regression(df, regressors, features_excluded, target,
+                          fit_intercept=True,
+                          num_outliers=0,
+                          title=None,
+                          x_label=None,
+                          y_label=None,
+                          with_line=True):
+    # df is pandas dataframe
+    # regressors is a list (or str) of column name to be used as regressors.
+    # num_outlier is an integer, denoting number of highest-error data points to be highlighted
+    # with_line + True plots y=x line
+    # This function automatically exclude data points having features which are in features_excluded list
 
+    df = df[df[features_excluded].sum(axis=1) == 0]
+    X, y = df[regressors], df[target]
+    lm = LinearRegression(fit_intercept=fit_intercept)
+    lm.fit(X, y)
+    y_hat = pd.Series(lm.predict(X), index=y.index)
+
+    # the following section searches for the highest value of error metric and indicate the datapoints in a scatterplot
+    # number of marked data points is specified with num_outliers
+    # y and y_hat must be pandas series (with indices)
+    # points with highest error (in descending order)
+
+    i_out = abs(y - y_hat).sort_values(ascending=False).index[:num_outliers]
+    # plotting results
+    plot_results(y, y_hat, i_out, num_outliers, title=None, x_label=None, y_label=None, with_line=True)
+
+    # evaluation
+    rmse = np.sqrt(metrics.mean_squared_error(y, y_hat))
+    mae = metrics.mean_absolute_error(y, y_hat)
+
+    return lm, rmse, mae, i_out
+
+
+def run_linear_regression_parachor(df, regressors, features_excluded, st_col, mv_col,
+                                   n=4,
+                                   run_on_st=True,
+                                   fit_intercept=True,
+                                   num_outliers=0,
+                                   title=None,
+                                   x_label=None,
+                                   y_label=None,
+                                   with_line=True):
+    # df is pandas dataframe
+    # regressors is a list of column name to be used as regressors.
+    # if run_on_st = True, results are calculated on surface tension level. Otherwise on
+    # num_outlier is an integer, denoting number of highest-error data points to be highlighted
+    # with_line + True plots y=x line
+    # This function automatically exclude data points having features which are in features_excluded list
+
+    df = df[df[features_excluded].sum(axis=1) == 0]
+    X, y_untrans = df[regressors], df[st_col]
+    y_trans = y_untrans**(1/n) * df[mv_col]
+
+    lm = LinearRegression(fit_intercept=fit_intercept)
+    lm.fit(X, y_trans)
+    y_trans_hat = pd.Series(lm.predict(X), index=y_trans.index)
+
+    if run_on_st:
+        y_hat = (y_trans_hat/df[mv_col]) ** n
+        y = y_untrans
+    else:
+        y_hat = y_trans_hat
+        y = y_trans
+
+    # the following section searches for the highest value of error metric and indicate the datapoints in a scatterplot
+    # number of marked data points is specified with num_outliers
+    # y and y_hat must be pandas series (with indices)
+    # points with highest error (in descending order)
+
+    i_out = abs(y - y_hat).sort_values(ascending=False).index[:num_outliers]
+    # plotting results
+    plot_results(y, y_hat, i_out, num_outliers, title=None, x_label=None, y_label=None, with_line=True)
+
+    # evaluation
+    rmse = np.sqrt(metrics.mean_squared_error(y, y_hat))
+    mae = metrics.mean_absolute_error(y, y_hat)
+
+    return lm, rmse, mae, i_out
+
+def run_linear_regression_M_scaling(df,
+                                    regressors,
+                                    features_excluded,
+                                    target,
+                                    scaler,
+                                    fit_intercept=True,
+                                    num_outliers=0,
+                                    title=None,
+                                    x_label=None,
+                                    y_label=None,
+                                    with_line=True):
+    # df is pandas dataframe
+    # regressors is a list (or str) of column name to be used as regressors.
+    # num_outlier is an integer, denoting number of highest-error data points to be highlighted
+    # with_line + True plots y=x line
+    # This function automatically exclude data points having features which are in features_excluded list
+    # regressors will be divided by scaler to make new features used in regression
+
+    df = df[df[features_excluded].sum(axis=1) == 0]
+    X, y = df[regressors].divide(df[scaler], axis=0), df[target]
+    lm = LinearRegression(fit_intercept=fit_intercept)
+    lm.fit(X, y)
+    y_hat = pd.Series(lm.predict(X), index=y.index)
+
+    # the following section searches for the highest value of error metric and indicate the datapoints in a scatterplot
+    # number of marked data points is specified with num_outliers
+    # y and y_hat must be pandas series (with indices)
+    # points with highest error (in descending order)
+
+    i_out = abs(y - y_hat).sort_values(ascending=False).index[:num_outliers]
+    # plotting results
+    plot_results(y, y_hat, i_out, num_outliers, title=None, x_label=None, y_label=None, with_line=True)
+
+    # evaluation
+    rmse = np.sqrt(metrics.mean_squared_error(y, y_hat))
+    mae = metrics.mean_absolute_error(y, y_hat)
+
+    return lm, rmse, mae, i_out
 
