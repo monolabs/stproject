@@ -35,17 +35,7 @@ df_fe0.to_csv(data_dir_raw / 'df_fe0.csv')
 
 # -----------------------------FEATURE ENGINEERING 0------------------------------------
 # -------------------------------------POLYMER------------------------------------------
-
-df_acids = pd.read_csv(data_dir_raw / 'acids_ref.csv', index_col=0)
-
-# adding column hosting RDKit molecule object from smiles
-PandasTools.AddMoleculeColumnToFrame(df_acids, 'smiles', 'rdkmol', includeFingerprints=True)
-
-# adding features from feature engineering 0
-df_acids_fe0 = construct_features(df_acids['rdkmol'], count_frags_0)
-df_acids_fe0.set_index(df_acids.index, inplace=True) # recovering original index
-
-df_acids_fe0.to_csv(data_dir_raw / 'df_acids_fe0.csv')
+# TODO
 # --------------------------------------------------------------------------------------
 
 
@@ -78,4 +68,34 @@ df_acids_fe0 = construct_features(df_acids['rdkmol'], count_frags_0)
 df_acids_fe0.set_index(df_acids.index, inplace=True) # recovering original index
 
 df_acids_fe0.to_csv(data_dir_raw / 'df_acids_fe0.csv')
+# --------------------------------------------------------------------------------------
+
+
+# -----------------------------FEATURE ENGINEERING 0------------------------------------
+# -------------------------------------TEST--------------------------------------------
+
+df_test = pd.read_csv(data_dir_raw / 'polyesters.csv')
+df_diols_fe0 = pd.read_csv(data_dir_raw / 'df_diols_fe0.csv', index_col=0)
+df_acids_fe0 = pd.read_csv(data_dir_raw / 'df_acids_fe0.csv', index_col=0)
+
+# correcting 'H', O-alc', 'O-acid' and 'O-ester' by subtracting atom/functional group loss from condensation
+# TODO: make a function for this procedure
+df_diols_fe0['H'] -= 2
+df_acids_fe0['H'] -= 2
+df_diols_fe0['O-alc'] -= 2
+df_acids_fe0['O-acid'] -= 4
+df_acids_fe0['O-ester'] += 4
+
+df_monomers_fe0 = pd.concat([df_diols_fe0, df_acids_fe0])
+monomers = df_test.columns[df_test.columns.str.contains('diol|acid')]
+features = df_monomers_fe0.columns
+
+df_test_fe0 = avg_monomer_features(df_test, df_monomers_fe0, monomers, features)
+
+# appending mn, tg, measured_st, st_polar, st_disperse, commercial
+to_append = ['mn', 'tg', 'measured_st', 'st_polar', 'st_disperse', 'commercial']
+for col in to_append:
+    df_test_fe0[col] = df_test[col]
+
+df_test_fe0.to_csv(data_dir_raw / 'df_test_fe0.csv')
 # --------------------------------------------------------------------------------------

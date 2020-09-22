@@ -1,14 +1,22 @@
 import numpy as np
 import pandas as pd
-import sklearn.metrics as metrics
+
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import GridSearchCV
-import re
+from sklearn.model_selection import train_test_split, KFold
+
+import xgboost as xgb
+
 from rdkit import Chem
 from rdkit.Chem.Descriptors import MolWt
+
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+from hyperopt import fmin, tpe, hp, STATUS_OK, Trials
+
+
+# ================================FEATURE ENGINEERING=======================================
 
 def diff(first, second):
     second = set(second)
@@ -176,6 +184,11 @@ def avg_monomer_features(df, ref, monomers, features):
 
     return pd.DataFrame(dummy_arr, columns=features)
 
+# ================================END OF FEATURE ENGINEERING=================================
+
+
+
+# ======================================LINEAR MODEL=========================================
 
 def regression_results(y_true, y_pred):
 
@@ -195,8 +208,9 @@ def regression_results(y_true, y_pred):
     print('RMSE: ', round(np.sqrt(mse),4))
 
 
-def plot_results(y, y_hat, i_out, num_outliers, title=None, x_label=None, y_label=None, with_line=True):
+def plot_results(y, y_hat, i_out, title=None, x_label=None, y_label=None, with_line=True):
     # plots data points with specified number of outliers and indices of outliers
+    # y and y_hat are pandas dataframe with index
 
     min_val, max_val = np.min(y.append(y_hat)), np.max(y.append(y_hat))
     sns.scatterplot(y_hat, y)
@@ -234,11 +248,11 @@ def run_linear_regression(df, regressors, features_excluded, target,
 
     i_out = abs(y - y_hat).sort_values(ascending=False).index[:num_outliers]
     # plotting results
-    plot_results(y, y_hat, i_out, num_outliers, title=None, x_label=None, y_label=None, with_line=True)
+    plot_results(y, y_hat, i_out, title=title, x_label=x_label, y_label=y_label, with_line=with_line)
 
     # evaluation
-    rmse = np.sqrt(metrics.mean_squared_error(y, y_hat))
-    mae = metrics.mean_absolute_error(y, y_hat)
+    rmse = np.sqrt(mean_squared_error(y, y_hat))
+    mae = mean_absolute_error(y, y_hat)
 
     return lm, rmse, mae, i_out
 
@@ -281,15 +295,15 @@ def run_linear_regression_parachor(df, regressors, features_excluded, st_col, mv
 
     i_out = abs(y - y_hat).sort_values(ascending=False).index[:num_outliers]
     # plotting results
-    plot_results(y, y_hat, i_out, num_outliers, title=None, x_label=None, y_label=None, with_line=True)
+    plot_results(y, y_hat, i_out, title=title, x_label=x_label, y_label=y_label, with_line=with_line)
 
     # evaluation
-    rmse = np.sqrt(metrics.mean_squared_error(y, y_hat))
-    mae = metrics.mean_absolute_error(y, y_hat)
+    rmse = np.sqrt(mean_squared_error(y, y_hat))
+    mae = mean_absolute_error(y, y_hat)
 
     return lm, rmse, mae, i_out
 
-def run_linear_regression_M_scaling(df,
+def run_linear_regression_scaled(df,
                                     regressors,
                                     features_excluded,
                                     target,
@@ -320,11 +334,180 @@ def run_linear_regression_M_scaling(df,
 
     i_out = abs(y - y_hat).sort_values(ascending=False).index[:num_outliers]
     # plotting results
-    plot_results(y, y_hat, i_out, num_outliers, title=None, x_label=None, y_label=None, with_line=True)
+    plot_results(y, y_hat, i_out, title=title, x_label=x_label, y_label=y_label, with_line=with_line)
 
     # evaluation
-    rmse = np.sqrt(metrics.mean_squared_error(y, y_hat))
-    mae = metrics.mean_absolute_error(y, y_hat)
+    rmse = np.sqrt(mean_squared_error(y, y_hat))
+    mae = mean_absolute_error(y, y_hat)
 
     return lm, rmse, mae, i_out
 
+def evaluate_model(model, X, y,
+                   num_outliers=0,
+                   title=None,
+                   x_label=None,
+                   y_label=None,
+                   with_line=True):
+    # predict new X and plot results with specified number of outliers
+
+    y_hat = pd.Series(model.predict(X), index=y.index)
+
+    # the following section searches for the highest value of error metric and indicate the datapoints in a scatterplot
+    # number of marked data points is specified with num_outliers
+    # y and y_hat must be pandas series (with indices)
+    # points with highest error (in descending order)
+
+    i_out = abs(y - y_hat).sort_values(ascending=False).index[:num_outliers]
+    # plotting results
+    plot_results(y, y_hat, i_out, title=title, x_label=x_label, y_label=y_label, with_line=with_line)
+
+    # evaluation
+    rmse = np.sqrt(mean_squared_error(y, y_hat))
+    mae = mean_absolute_error(y, y_hat)
+
+    return rmse, mae, i_out
+
+# ====================================END OF LINEAR MODEL========================================
+
+
+# ===========================================XGBOOST==============================================
+
+def optimize_xgb(trials, score_func, space, algo=tpe.suggest, max_evals=250):
+
+    # this function optimizes xgb parameters
+    # space = defined feature space to be optimized
+    # trials = hyperopt trials object
+    # score_xgb = score function
+    # algo = algorithm use to suggest next point
+    # prints best parameters
+
+    best = fmin(score_func, space, algo=algo, trials=trials, max_evals=max_evals)
+    print(best)
+
+def run_xgb(X, y,
+            space,
+            k=5,
+            max_evals=250,
+            random_state=42):
+    '''
+     1. randomly partitions the data into train and validation set (p = portion going to test)
+     2. run hyperopt in sets of params with max iteration = max_evals
+     3. return list of models trained on the entire train data
+
+     X and y = full train set (entire data - test set)
+     space = space of parameters for hyperopt optimization. Template:
+         space = {
+                 'n_estimators' : hp.quniform('n_estimators', 100, 1000, 1),
+                 'eta' : hp.quniform('eta', 0.01, 0.10, 0.02),
+                 'max_depth' : hp.choice('max_depth', np.arange(1, 13, 1)),
+                 'min_child_weight' : hp.quniform('min_child_weight', 1, 6, 1),
+                 'subsample' : hp.quniform('subsample', 0.5, 1, 0.05),
+                 'gamma' : hp.quniform('gamma', 0.5, 1, 0.05),
+                 'colsample_bytree' : hp.quniform('colsample_bytree', 0.5, 1, 0.05),
+                 'eval_metric': 'rmse',
+                 'objective': 'reg:squarederror',
+                 'nthread' : 6,
+                 'silent' : 1,
+                 'seed': 42
+                 }
+    '''
+
+    # Defining score function
+    def score_xgb(params):
+        # must take only params (space to be optimized) as argument
+        # train xgb model, evaluate, returns the score, status and model
+
+        print(f"iteration: {kfold_iteration}. Training with params:")
+        print(params)
+        num_round = int(params['n_estimators'])
+        del params['n_estimators']
+        dtrain = xgb.DMatrix(X_train, label=y_train)
+        dvalid = xgb.DMatrix(X_valid, label=y_valid)
+        # watchlist = [(dvalid, 'eval'), (dtrain, 'train')]
+        model = xgb.train(params, dtrain, num_round)
+        predictions = model.predict(dvalid)
+        score = np.sqrt(mean_squared_error(y_valid, predictions))
+        print("\tScore {0}\n\n".format(score))
+        return {'loss': score, 'status': STATUS_OK, 'trained_model': model}
+
+    # list to capture k best models
+    models = []
+    params = []
+
+    # splitting into k-folds
+    kf = KFold(n_splits=k, shuffle=True, random_state=random_state)
+    kf.get_n_splits(X)
+
+    # Looping through k splits
+    kfold_iteration=1
+    for train_index, valid_index in kf.split(X):
+        X_train, X_valid = X.iloc[train_index], X.iloc[valid_index]
+        y_train, y_valid = y.iloc[train_index], y.iloc[valid_index]
+
+        # performing hyperopt optimization
+        # the function score_func takes X_train, X_valid, y_train and y_valid to train xgbmodel
+        trials = Trials()
+        best = fmin(score_xgb, space, algo=tpe.suggest, trials=trials, max_evals=max_evals)
+        params.append(best)
+
+        # training and recording best model
+        best_n_estimators = int(best['n_estimators'])
+        del best['n_estimators']
+        dtrain_full = xgb.DMatrix(X, label=y)
+        models.append(xgb.train(best, dtrain_full, best_n_estimators))
+
+        kfold_iteration += 1
+
+    return models, params
+
+
+def evaluate_xgb_models(models,
+                        X,
+                        y,
+                        weights=None,
+                        num_outliers=0,
+                        title=None,
+                        x_label=None,
+                        y_label=None,
+                        with_line=True):
+    # returns weighted predictions of several models
+    # weights = list of weights (length = length of models)
+    # y is pandas series
+
+    predictions = np.zeros((len(X), len(models)))
+    if weights == None:
+        weights = [1/len(models)] * len(models)
+    weights = np.array(weights).reshape((1, -1)) # into 1xlen(models) numpy array
+    for i in range(len(models)):
+        predictions[:, i] = models[i].predict(xgb.DMatrix(X))
+    y_hat = pd.Series(np.sum(predictions * weights, axis=1), index=X.index)
+
+    i_out = abs(y - y_hat).sort_values(ascending=False).index[:num_outliers]
+
+    plot_results(y, y_hat, i_out, title=title, x_label=x_label, y_label=y_label, with_line=with_line)
+
+    # evaluation
+    rmse = np.sqrt(mean_squared_error(y, y_hat))
+    mae = mean_absolute_error(y, y_hat)
+
+    return rmse, mae, i_out
+
+
+# ========================================END OF XGBOOST=========================================
+
+
+# =======================================LOADING DATA========================================
+
+def load_data_fe0(file_path, features_excluded, target):
+    # function automatically exclude datapoints with non-zero entries in features_excluded
+    # e.g. if aldehyde 'CHO' is excluded, any substance identified as aldehyde will be removed
+
+    df = pd.read_csv(file_path, index_col=0)
+    df = df[df[features_excluded].sum(axis=1) == 0]
+    X = df[df.columns.difference(features_excluded + [target])]
+    y = df[target]
+    X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    return X_train, X_valid, y_train, y_valid
+
+# ==================================END OF LOADING DATA========================================
