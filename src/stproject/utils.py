@@ -390,9 +390,11 @@ def run_xgb(X, y,
             max_evals=250,
             random_state=42):
     '''
-     1. randomly partitions the data into train and validation set (p = portion going to test)
-     2. run hyperopt in sets of params with max iteration = max_evals
-     3. return list of models trained on the entire train data
+     Runs hyperopt optimization where each iteration's score is the average score of k-fold CV.
+     Each iteration consists of:
+     1. random partitioning of the data into train and validation set (p = portion going to test)
+     2. Computation of average k-fold score
+     Function returns model trained on full dataset, best params and trials object
 
      X and y = full train set (entire data - test set)
      space = space of parameters for hyperopt optimization. Template:
@@ -417,71 +419,60 @@ def run_xgb(X, y,
         # must take only params (space to be optimized) as argument
         # train xgb model, evaluate, returns the score, status and model
 
-        print(f"iteration: {kfold_iteration}. Training with params:")
+        print(f"Training with params:")
         print(params)
         num_round = int(params['n_estimators'])
         del params['n_estimators']
-        dtrain = xgb.DMatrix(X_train, label=y_train)
-        dvalid = xgb.DMatrix(X_valid, label=y_valid)
-        # watchlist = [(dvalid, 'eval'), (dtrain, 'train')]
-        model = xgb.train(params, dtrain, num_round)
-        predictions = model.predict(dvalid)
-        score = np.sqrt(mean_squared_error(y_valid, predictions))
-        print("\tScore {0}\n\n".format(score))
-        return {'loss': score, 'status': STATUS_OK, 'trained_model': model}
 
-    # list to capture k best models
-    models = []
-    params = []
+        score = []
 
-    # splitting into k-folds
-    kf = KFold(n_splits=k, shuffle=True, random_state=random_state)
-    kf.get_n_splits(X)
+        # splitting into k-folds
+        kf = KFold(n_splits=k, shuffle=True, random_state=random_state)
+        kf.get_n_splits(X)
 
-    # Looping through k splits
-    kfold_iteration=1
-    for train_index, valid_index in kf.split(X):
-        X_train, X_valid = X.iloc[train_index], X.iloc[valid_index]
-        y_train, y_valid = y.iloc[train_index], y.iloc[valid_index]
+        # Looping through k splits
+        for train_index, valid_index in kf.split(X):
+            X_train, X_valid = X.iloc[train_index], X.iloc[valid_index]
+            y_train, y_valid = y.iloc[train_index], y.iloc[valid_index]
 
-        # performing hyperopt optimization
-        # the function score_func takes X_train, X_valid, y_train and y_valid to train xgbmodel
-        trials = Trials()
-        best = fmin(score_xgb, space, algo=tpe.suggest, trials=trials, max_evals=max_evals)
-        params.append(best)
+            dtrain = xgb.DMatrix(X_train, label=y_train)
+            dvalid = xgb.DMatrix(X_valid, label=y_valid)
+            # watchlist = [(dvalid, 'eval'), (dtrain, 'train')]
+            model = xgb.train(params, dtrain, num_round)
+            predictions = model.predict(dvalid)
+            score.append(np.sqrt(mean_squared_error(y_valid, predictions)))
 
-        # training and recording best model
-        best_n_estimators = int(best['n_estimators'])
-        del best['n_estimators']
-        dtrain_full = xgb.DMatrix(X, label=y)
-        models.append(xgb.train(best, dtrain_full, best_n_estimators))
+        avg_score = np.mean(score)
+        print("\tScore {0}\n\n".format(avg_score))
+        return {'loss': avg_score, 'status': STATUS_OK}
 
-        kfold_iteration += 1
+    # performing hyperopt optimization
+    trials = Trials()
+    best = fmin(score_xgb, space, algo=tpe.suggest, trials=trials, max_evals=max_evals)
+    best_params = best
 
-    return models, params
+    # training and recording best model
+    best_n_estimators = int(best['n_estimators'])
+    del best['n_estimators']
+    dtrain_full = xgb.DMatrix(X, label=y)
+    model = xgb.train(best, dtrain_full, best_n_estimators)
+
+    return model, best_params, trials
 
 
-def evaluate_xgb_models(models,
+def evaluate_xgb_model(model,
                         X,
                         y,
-                        weights=None,
                         num_outliers=0,
                         title=None,
                         x_label=None,
                         y_label=None,
                         with_line=True):
-    # returns weighted predictions of several models
-    # weights = list of weights (length = length of models)
-    # y is pandas series
+    '''
+    returns rmse, mae and indices of outliers
+    '''
 
-    predictions = np.zeros((len(X), len(models)))
-    if weights == None:
-        weights = [1/len(models)] * len(models)
-    weights = np.array(weights).reshape((1, -1)) # into 1xlen(models) numpy array
-    for i in range(len(models)):
-        predictions[:, i] = models[i].predict(xgb.DMatrix(X))
-    y_hat = pd.Series(np.sum(predictions * weights, axis=1), index=X.index)
-
+    y_hat = pd.Series(model.predict(xgb.DMatrix(X)), index=X.index)
     i_out = abs(y - y_hat).sort_values(ascending=False).index[:num_outliers]
 
     plot_results(y, y_hat, i_out, title=title, x_label=x_label, y_label=y_label, with_line=with_line)
